@@ -7,24 +7,81 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+data <- read_csv("/Users/kenji/Documents/GitHub/Rays R&D/rays_questionnaire_dataset_2022.csv")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+sum(is.na(data$predictor_A))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+summary(lm(target_y ~ predictor_A, data = data))
+```
+
+```{r}
+summary(lm(target_y ~ predictor_A + predictor_B, data = data))
+```
+y = -10.7136 + 1.7047 x A + 0.3679 x B
+
+```{r}
+result_1 <- -10.7136 + 1.7047 * 1.2 + 0.3679 * -2.1
+result_1
+```
+
+
+To get Pr(>|t|) we need to get the t-value and p-value for each variable.
+To get the p-value we do:
+```{r}
+## p-value = p-value = 2 * pt(abs(t value), residual df, lower.tail = FALSE)
+
+P_1 <- 2 * pt(abs(0.377), 995, lower.tail = FALSE)
+P_2 <- 2 * pt(abs(5.888), 995, lower.tail = FALSE)
+P_3 <- 2 * pt(abs(9.923), 995, lower.tail = FALSE)
+P_4 <- 2 * pt(abs(3.345), 995, lower.tail = FALSE)
+
+P_1
+P_2
+P_3
+P_4
+```
+```{r}
+#Winston_Walker <- P(H2/E) = [P(E/H2) x P(H2)]  / [P(E/H1) x P(H1)  + P(E/H2) x P(H2)]
+# P(H1) = 0.5
+# P(H2) = 0.5
+# P(E/H1) = 0.29
+# P(E/H2) = 0.35
+
+Winston_Walker <- (0.35 * 0.5)/(0.29*0.5 + 0.35*0.5)*100
+Winston_Walker
+```
+
+```{r}
+#Confidence Interval
+
+S.E_mean <- 10/sqrt(10)
+S.E_mean
+
+alpha = 0.05
+degrees.freedom = 10 - 1
+t.score = qt(p = alpha/2, df = degrees.freedom, lower.tail = F)
+print(t.score)
+
+margin.error <- t.score * S.E_mean
+margin.error
+
+sample.mean <- 95
+
+lower.bound <- sample.mean - margin.error
+upper.bound <- sample.mean + margin.error
+print(c(lower.bound,upper.bound))
+```
+
